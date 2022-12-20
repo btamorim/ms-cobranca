@@ -5,18 +5,10 @@ namespace App\Services;
 use App\Contracts\ITicketInterface;
 use App\Http\Requests\TicketRequest;
 use App\Models\Ticket;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\BadResponseException;
-use Illuminate\Console\View\Components\Warn;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Database\QueryException;
-
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
-
-// use App\Repositories\AdditionRepository;
 
 class TicketService implements ITicketInterface
 {
@@ -221,93 +213,4 @@ class TicketService implements ITicketInterface
         return true;
 
     }
-
-    // public function integrateTicket(array $data): bool
-    // {
-    //     try {
-           
-    //         $client = app()->make(Client::class);
-
-    //         $baseUrl = getenv('INTEGRATE_TICKET_URL');
-
-    //         if (isset($this->key)) {
-    //             $headers['Authorization'] = $this->key;
-    //             $headers['Content-Type']  = 'application/json';
-    //         }
-
-    //         if (isset($this->jwt)) {
-    //             $headers['Authorization'] = $this->jwt;
-    //         }
-
-    //         if (isset($this->appKey)) {
-    //             $headers['AppKey'] = $this->appKey;
-    //         }
-            
-    //         /**
-    //          * caso fosse uma url real, aqui de fato faz o acesso a API externa
-    //          */
-
-    //         /*
-    //             $response = $client->request('POST', $baseUrl, ['body' => $data, 'headers' => $headers, 'verify' => false]);
-            
-    //             $this->statusCode = $response->getStatusCode();
-    //             $this->msg = \json_decode($response->getBody(), true);
-
-    //             return true; 
-    //         */
-
-    //         $responses = $data[0];
-
-    //         foreach ($responses as $data) {
-
-    //             $tickets['data'] = [
-    //                 'nosso_nro' => sprintf('%08s',$data['debtId']),
-    //                 'agencia' => rand(1,999),
-    //                 'conta' => sprintf('%08s', rand(1,99999999)),
-    //                 'conta_dv' => rand(0,9),
-    //                 'identificacao' => 'Código Aberto de Sistema de Boletos',
-    //                 'cedente' => 'Razão Social da sua empresa',
-    //                 'cpf_cnpj' => '11.111.111/0001-01',
-    //                 'sacado' => $data['name'],
-    //                 'identif_Sacado'=> $data['governmentId'],
-    //                 'valor_cobrado' => $data['debtAmount'],
-    //                 'data_venc' => $data['debtDueDate'],
-    //                 'valor_total_boleto' => ($data['debtAmount'] + 3.5)
-    //             ];
-
-    //         }
-
-    //         $this->statusCode = 200;
-    //         $this->msg = $tickets;
-
-    //         return true;
-
-    //     } catch (BadResponseException $th) {
-    //         $this->statusCode = StatusService::STATUS_CODE_ERRO;
-    //         $this->msg = \json_decode($th->getResponse()->getBody(), true);
-    //         $this->error = $th->getMessage();
-    //         $this->errorCode = $th->getResponse()->getStatusCode() ?? $th->getCode();
-
-    //         return false;
-
-    //     } catch (\Throwable $th) {
-    //         $this->statusCode = StatusService::STATUS_CODE_ERRO;
-    //         $this->msg = $th->getMessage();
-    //         $this->error = $th->getMessage();
-    //         $this->errorCode = 500;
-
-    //         return false;
-    //     }
-    // }
-
-    // public function storeInStorage(array $dados): void
-    // {
-    //     $boletos = fopen(now().'_boletos.txt', 'a+');
-        
-    //     fwrite($boletos,json_encode($dados['data']) );
-
-    //     fclose($boletos);
-    // }
-
-
 }
