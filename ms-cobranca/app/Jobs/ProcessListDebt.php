@@ -29,10 +29,10 @@ class ProcessListDebt implements ShouldQueue
      *
      * @return void
      */
-    public function handle()
+    public function handle(): void
     {
         $files = array_map('pathinfo', \File::files(storage_path('app')));
-        
+
         foreach ($files as $file) {
             if ($file['extension'] === 'csv')
             {
@@ -42,12 +42,10 @@ class ProcessListDebt implements ShouldQueue
 
                 if (!$process = $processDebtService->processListDebtJob($listDebt))
                 {
-                    return false;
+                    continue;
                 }
 
                 Storage::delete($listDebt.".".$file['extension']);
-
-                return true;
             }
         }
     }

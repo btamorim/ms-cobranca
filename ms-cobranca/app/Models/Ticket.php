@@ -22,11 +22,11 @@ class Ticket extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'debtId', //fk
-        'debtDueDate', //dtVencimento
+        'debtId',
+        'debtDueDate',
         'amount',
         'createdAt',
-        'expirationDate', //vencimento
+        'expirationDate',
         'bankId',
         'barCode',
         'statusId',
@@ -35,7 +35,7 @@ class Ticket extends Model
     ];
 
     /**
-     * Get the Costumer of debits.
+     * Get the customer of debits.
      */
     public function debit()
     {

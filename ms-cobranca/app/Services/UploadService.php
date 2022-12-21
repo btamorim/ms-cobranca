@@ -31,7 +31,7 @@ class UploadService implements IUploadInterface
 
         } catch (UnableToWriteFile $e) {
             $this->msg = "problem writing the file!";
-            $this->statusCode = StatusService::STATUS_CODE_ERRO;
+            $this->statusCode = StatusServiceEnum::STATUS_CODE_ERRO;
             $this->errorCode = $e->getCode();
             $this->error = $e->getMessage();
 
@@ -39,7 +39,7 @@ class UploadService implements IUploadInterface
 
         } catch (\Throwable $th) {
             $this->msg = "problem writing the file!";
-            $this->statusCode = StatusService::STATUS_CODE_ERRO;
+            $this->statusCode = StatusServiceEnum::STATUS_CODE_ERRO;
             $this->errorCode = $th->getCode();
             $this->error = $th->getMessage();
 

@@ -5,11 +5,10 @@ namespace App\Traits;
 trait Log
 {
     /**
-     * Store response on new relic
+     * Store response on local or new relic 
      * 
      * @param array $data
      * @param string $eventName
-     * @return void 
      */
     private function storeLogData(array $data, string $eventName): void
     {

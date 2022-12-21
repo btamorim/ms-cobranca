@@ -4,8 +4,8 @@ namespace App\Services;
 
 use App\Contracts\IProcessDebtInterface;
 use App\Imports\ChargesImport;
-use App\Jobs\notificationChargeCostumer;
-use App\Traits\ConsumerExternalServices;
+use App\Jobs\notificationChargeCustomer;
+use App\Traits\ConsumerExternalServicesTrait;
 use App\Traits\Log;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\HeadingRowImport;
@@ -16,7 +16,7 @@ use Maatwebsite\Excel\Concerns\Importable;
 
 class ProcessDebtService implements IProcessDebtInterface
 {
-    use Importable, ConsumerExternalServices, Log;
+    use Importable, ConsumerExternalServicesTrait, Log;
     
     public $statusCode;
     public $msg;
@@ -49,7 +49,7 @@ class ProcessDebtService implements IProcessDebtInterface
                 {
                     $this->storeLogData($response, "error_request_integrate_ticket");
                     
-                    return false;
+                    continue;
                 }
 
                 $ticketService = app()->make(TicketService::class);
@@ -71,7 +71,7 @@ class ProcessDebtService implements IProcessDebtInterface
             return true;
             
         } catch (\Throwable $th) {
-            $this->statusCode = StatusService::STATUS_CODE_ERRO;
+            $this->statusCode = StatusServiceEnum::STATUS_CODE_ERRO;
             $this->msg = $th->getMessage();
             $this->errorCode = $th->getCode();
 
@@ -100,14 +100,14 @@ class ProcessDebtService implements IProcessDebtInterface
 
             }
 
-            $this->statusCode = StatusService::STATUS_CODE_ERRO;
+            $this->statusCode = StatusServiceEnum::STATUS_CODE_ERRO;
             $this->msg = json_encode($errors);
             $this->errorCode = 400;
 
             return false;
 
         } catch (\Throwable $th) {
-            $this->statusCode = StatusService::STATUS_CODE_ERRO;
+            $this->statusCode = StatusServiceEnum::STATUS_CODE_ERRO;
             $this->msg = $th->getMessage();
             $this->errorCode = 400;
 
@@ -140,14 +140,14 @@ class ProcessDebtService implements IProcessDebtInterface
 
             }
 
-            $this->statusCode = StatusService::STATUS_CODE_ERRO;
+            $this->statusCode = StatusServiceEnum::STATUS_CODE_ERRO;
             $this->msg = json_encode($errors);
             $this->errorCode = 400;
 
             return false;
 
         } catch (\Throwable $th) {
-            $this->statusCode = StatusService::STATUS_CODE_ERRO;
+            $this->statusCode = StatusServiceEnum::STATUS_CODE_ERRO;
             $this->msg = $th->getMessage();
             $this->errorCode = 400;
 
@@ -197,7 +197,7 @@ class ProcessDebtService implements IProcessDebtInterface
 
         } catch (\Throwable $th) {
 
-            $this->statusCode = StatusService::STATUS_CODE_ERRO;
+            $this->statusCode = StatusServiceEnum::STATUS_CODE_ERRO;
             $this->msg = "Invalid Spreadsheet file";
             $this->errorCode = 400;
 
@@ -209,7 +209,7 @@ class ProcessDebtService implements IProcessDebtInterface
     public function publishTicketMail(array $attributes): bool
     {
         try {
-            notificationChargeCostumer::dispatch($attributes);
+            notificationChargeCustomer::dispatch($attributes);
             
         } catch (\Throwable $th) {
             $this->storeLogData(['message' => $th->getMessage()], "error_request_integrate_ticket");

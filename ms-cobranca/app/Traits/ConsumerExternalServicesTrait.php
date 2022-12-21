@@ -6,7 +6,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Psr7\Response;
 
-trait ConsumerExternalServices
+trait ConsumerExternalServicesTrait
 {
     public function performRequest($method, $requestUrl, $data = [])
     {

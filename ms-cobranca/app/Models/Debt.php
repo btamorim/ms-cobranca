@@ -33,15 +33,15 @@ class Debt extends Model
     ];
 
     /**
-     * Get the Costumer of debits.
+     * Get the Customer of debits.
      */
-    public function costumer()
+    public function Customers()
     {
-        return $this->belongsTo(Costumer::class, 'custId');
+        return $this->belongsTo(Customer::class, 'custId');
     }
 
     /**
-     * Get the Costumer of debits.
+     * Get the Customer of debits.
      */
     public function tikets()
     {

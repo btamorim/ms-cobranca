@@ -40,7 +40,7 @@ class TicketRequest extends FormRequest
     {
         return [
             'debtId' => 'required|numeric',
-            'costumerId' => 'required|numeric',
+            'customerId' => 'required|numeric',
             'governmentId' => 'required|string',
             'amount' => 'required|numeric',
             'debtDueDate' => 'required|date'
@@ -56,14 +56,14 @@ class TicketRequest extends FormRequest
     public function messages()
     {
         return [
-            'debtId.required' => 'This :attribute ield is required. Enter the paid billing ID.',
-            'paidAt.required' => 'This :attribute ield is required. Enter the billing payment date.',
-            'paidAmount.required' => 'This :attribute ield is required. Enter the payment amount.',
-            'paidBy.required' => 'This :attribute ield is required. Enter the name of the customer who made the payment.',
-            'governmentId' => 'This :attribute ield is required. Enter the customers CPF.',
-            'amount' => 'This :attribute ield is required. Enter the ticket amount correctly.',
-            'debtDueDate' => 'This :attribute ield is required. Enter the correct expiration date.',
-            'costumerId' => 'This :attribute ield is required. Enter the customer code.'
-        ];
+            'debtId.required' => 'This :attribute field is required. Enter the paid billing ID.',
+            'paidAt.required' => 'This :attribute field is required. Enter the billing payment date.',
+            'paidAmount.required' => 'This :attribute field is required. Enter the payment amount.',
+            'paidBy.required' => 'This :attribute field is required. Enter the name of the customer who made the payment.',
+            'governmentId' => 'This :attribute field is required. Enter the customers CPF.',
+            'amount' => 'This :attribute field is required. Enter the ticket amount correctly.',
+            'debtDueDate' => 'This :attribute field is required. Enter the correct expiration date.',
+            'customerId' => 'This :attribute field is required. Enter the customer code.'
+        ]; 
     }
 }

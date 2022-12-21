@@ -5,14 +5,8 @@ namespace App\Services;
 use App\Contracts\ITicketInterface;
 use App\Http\Requests\TicketRequest;
 use App\Models\Ticket;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\BadResponseException;
-use Illuminate\Console\View\Components\Warn;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Database\QueryException;
-
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -62,7 +56,7 @@ class TicketService implements ITicketInterface
         } catch (\Throwable $th) {
             $this->msg        = $th->getMessage();
             $this->errorCode  = $th->getCode();
-            $this->statusCode = StatusService::STATUS_CODE_ERRO;
+            $this->statusCode = StatusServiceEnum::STATUS_CODE_ERRO;
 
             return false;
         }
@@ -92,7 +86,7 @@ class TicketService implements ITicketInterface
             
             $this->msg = $th->getMessage();
             $this->errorCode  = 422;
-            $this->statusCode = StatusService::STATUS_CODE_ERRO;
+            $this->statusCode = StatusServiceEnum::STATUS_CODE_ERRO;
             
             return false;            
         }
@@ -137,20 +131,20 @@ class TicketService implements ITicketInterface
                  */
                 // $ticket = Ticket::where('ticketId', $ticketId)->update($data);
                 
-                $this->statusCode = StatusService::STATUS_CODE_SUCCESSO;
+                $this->statusCode = StatusServiceEnum::STATUS_CODE_SUCCESSO->value;
                 $this->msg = 'Ticket downloaded successfully.';
 
                 return true;
             
             } catch (\Throwable $th) {
-                $this->statusCode = StatusService::STATUS_CODE_ERRO;
+                $this->statusCode = StatusServiceEnum::STATUS_CODE_ERRO->value;
                 $this->msg = "It was not possible to download the ticket. Error: {$th->getMessage()}";
 
             }
         }
         else
         {
-            $this->statusCode = StatusService::STATUS_CODE_ERRO;
+            $this->statusCode = StatusServiceEnum::STATUS_CODE_ERRO;
             $this->msg = 'Ticket not found.';
 
         }
@@ -164,7 +158,7 @@ class TicketService implements ITicketInterface
         try {
 
             $dataTicket = $this->parseTicketInsert($data);
-            
+
             $this->validateTicket($dataTicket);
 
             $ticket = new Ticket();
@@ -182,7 +176,7 @@ class TicketService implements ITicketInterface
             return $ticket;
 
         } catch (\Throwable $th) {
-            $this->statusCode = StatusService::STATUS_CODE_ERRO;
+            $this->statusCode = StatusServiceEnum::STATUS_CODE_ERRO;
             $this->msg = $th->getMessage();
 
             return false;
@@ -194,7 +188,7 @@ class TicketService implements ITicketInterface
     {
         return [
             "debtId" => $data['debtId'],
-            "costumerId" => rand(1, 900),
+            "customerId" => rand(1, 900),
             "governmentId" => $data['cpf_cnpj'],
             "amount" => $data['debtAmount'],
             "debtDueDate" => $data['debtDueDate'],

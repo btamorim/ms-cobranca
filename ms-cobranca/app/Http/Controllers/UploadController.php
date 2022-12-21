@@ -5,18 +5,19 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UploadRequest;
 use App\Jobs\ProcessListDebt;
 use App\Services\StatusService;
+use App\Services\StatusServiceEnum;
 use App\Services\UploadService;
-
+use Illuminate\Http\JsonResponse;
 class UploadController extends Controller
 {
-    public function UploadCharges(UploadRequest $request)
+    public function UploadCharges(UploadRequest $request): JsonResponse
     {
         try {
 
-            if (!$request->hasFile('listDebt')) {
-
+            if (!$request->hasFile('listDebt')) 
+            {
                 return response()->json([
-                    'statusCode' => StatusService::STATUS_CODE_ERRO,
+                    'statusCode' => StatusServiceEnum::STATUS_CODE_ERRO,
                     'msg' => 'The list of debts has not process!'
                 ], 400);
             }
@@ -35,13 +36,13 @@ class UploadController extends Controller
             dispatch(new ProcessListDebt())->delay(3);
 
             return response()->json([
-                'statusCode' => StatusService::STATUS_CODE_SUCCESSO,
+                'statusCode' => StatusServiceEnum::STATUS_CODE_SUCCESSO,
                 'msg' => 'The list of debits has been processed!'
             ], 200);
 
         } catch (\Throwable $th) {
             return response()->json([
-                'statusCode' => StatusService::STATUS_CODE_ERRO,
+                'statusCode' => StatusServiceEnum::STATUS_CODE_ERRO,
                 'msg' => $th->getMessage()
             ], 400);
         }
