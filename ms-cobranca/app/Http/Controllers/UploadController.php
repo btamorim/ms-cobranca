@@ -23,7 +23,7 @@ class UploadController extends Controller
 
             $uploadService = app()->make(UploadService::class);
 
-            if(!$uploadService->storeFile($request)) 
+            if(!$uploadService->storeFile($request->file('listDebt'))) 
             {
                 return response()->json([
                     'statusCode' => $uploadService->statusCode,

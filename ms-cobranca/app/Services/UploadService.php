@@ -5,6 +5,7 @@ namespace App\Services;
 
 use App\Contracts\IUploadInterface;
 use App\Http\Requests\UploadRequest;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use League\Flysystem\UnableToWriteFile;
@@ -21,10 +22,10 @@ class UploadService implements IUploadInterface
 
     }
 
-    public function storeFile(Request $request): bool
+    public function storeFile(UploadedFile $request): bool
     {
         try {
-            Storage::disk('local')->put('', $request->file('listDebt'));
+            Storage::disk('local')->put('', $request);
 
             return true;
 

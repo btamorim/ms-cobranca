@@ -20,7 +20,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::group(['prefix' => 'ticket'], function () {
     Route::post('confirmation', 'TicketController@paymentConfirmation');
-
 });
 
 Route::post('process', 'UploadController@UploadCharges');
+
+Route::group(['prefix' => 'debt'], function () {
+    Route::get('processJob', 'ProcessDebtController@ProcessJob');
+
+});
