@@ -24,11 +24,11 @@ class TicketController extends Controller
     public function paymentConfirmation(TicketRequest $request)
     {
         $ticketService = app()->make(TicketService::class);
-        
+
         $ticketService->checkoutTicket($request);
         
         if ($ticketService->statusCode == 'ERROR') {
-            
+
             return response()->json([
                 'statusCode' => $ticketService->statusCode,
                 'msg' => $ticketService->msg

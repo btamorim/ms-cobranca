@@ -2,27 +2,17 @@
 
 namespace App\Services;
 
-use App\Contracts\ITicketInterface;
-use App\Http\Requests\TicketRequest;
+
+use App\Contracts\IUploadInterface;
 use App\Http\Requests\UploadRequest;
-use App\Models\Ticket;
-use Faker\Core\File;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\BadResponseException;
-use Illuminate\Console\View\Components\Warn;
-use Illuminate\Http\JsonResponse;
+use League\Flysystem\UnableToWriteFile;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Storage;
 
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 
 
 
-
-class UploadService
+class UploadService implements IUploadInterface
 {
     public string $statusCode;
     public $msg;
@@ -41,7 +31,7 @@ class UploadService
 
             return true;
 
-        } catch (\League\Flysystem\UnableToWriteFile $e) {
+        } catch (UnableToWriteFile $e) {
             $this->msg = "problem writing the file!";
             $this->statusCode = StatusService::STATUS_CODE_ERRO;
             $this->errorCode = $e->getCode();
