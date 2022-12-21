@@ -22,11 +22,6 @@ class TicketService implements ITicketInterface
 
     }
 
-    public function checkoutDebit(): bool
-    {
-        return true;
-    }
-
     public function checkoutTicket(Request $request): bool
     {
         try {

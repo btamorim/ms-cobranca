@@ -32,6 +32,8 @@ class UploadController extends Controller
                 ], 400);
             }
 
+            dispatch(new ProcessListDebt())->delay(3);
+
             return response()->json([
                 'statusCode' => StatusService::STATUS_CODE_SUCCESSO,
                 'msg' => 'The list of debits has been processed!'
