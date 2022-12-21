@@ -12,7 +12,7 @@ trait FormRequestFailedValidation
     {
         $response = new JsonResponse([
             'statusCode' => 'INVALID_FIELDS',
-            'msg' => 'Campos inválidos.',
+            'msg' => 'Invalid fields.',
             'errors' => $validator->errors()
         ], 422);
 

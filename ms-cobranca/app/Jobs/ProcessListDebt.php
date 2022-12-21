@@ -40,15 +40,14 @@ class ProcessListDebt implements ShouldQueue
 
                 $processDebtService = app()->make(ProcessDebtService::class);
 
-                if (!$processDebtService->processListDebtJob($listDebt))
+                if (!$process = $processDebtService->processListDebtJob($listDebt))
                 {
                     return false;
                 }
 
                 Storage::delete($listDebt.".".$file['extension']);
-                
-                return true;
 
+                return true;
             }
         }
     }

@@ -170,7 +170,7 @@ class ProcessDebtService implements IProcessDebtInterface
 
         if (empty($title))
         {
-            throw new \Exception("O arquivo enviado esta vazio!", 400);
+            throw new \Exception("Uploaded file is empty!", 400);
         }
         else if(empty($diff)){
 
@@ -178,7 +178,7 @@ class ProcessDebtService implements IProcessDebtInterface
         }
         else
         {
-            throw new \Exception("Os dados enviados não correspondem ao esperado!", 400);
+            throw new \Exception("The data sent does not match what was expected!", 400);
         }
 
         return false;

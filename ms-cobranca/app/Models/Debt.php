@@ -23,11 +23,11 @@ class Debt extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'custId', //fk Custumer
-        'debtAmount', //vlrPag
+        'custId',
+        'debtAmount',
         'status',
-        'ticketId', //fk
-        'checkoutAt', //dataBaixa
+        'ticketId',
+        'checkoutAt',
         'createdAt',
         'updatedAt'
     ];
