@@ -22,3 +22,5 @@ Route::group(['prefix' => 'ticket'], function () {
     Route::post('confirmation', 'TicketController@paymentConfirmation');
 
 });
+
+Route::post('process', 'UploadController@UploadCharges');
