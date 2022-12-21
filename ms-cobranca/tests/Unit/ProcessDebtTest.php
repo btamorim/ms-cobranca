@@ -9,22 +9,11 @@ use Illuminate\Http\Request as Request;
 
 class ProcessDebtTest extends TestCase
 {
-    /**
-     * A basic unit test example.
-     *
-     * @return void
-     */
-    public function test_example()
-    {
-        $this->assertTrue(true);
-    }
-
-    /** @test */
-    public function import_csv_by_name_and_parse_to_array()
+    public function testImportCsvByNameAndParseToArray()
     {
         $processDebtService = app()->make(ProcessDebtService::class);
 
-        $name = $this->create_file_csv();
+        $name = $this->createFileCsv();
 
         $arrayReturn = $processDebtService->importCsv(str_replace('.csv', "", $name));
 
@@ -33,7 +22,7 @@ class ProcessDebtTest extends TestCase
         $this->assertIsArray($arrayReturn);
     }
 
-    public function create_file_csv()
+    public function createFileCsv()
     {
         $name = date("Y_m_d_H_i_s")."_test.csv";
 
@@ -54,8 +43,7 @@ class ProcessDebtTest extends TestCase
         return $name;
     }
 
-    /** @test */
-    public function valid_is_head_csv_is_especified()
+    public function testValidIsHeadCsvIsEspecified()
     {
         $processDebtService = app()->make(ProcessDebtService::class);
 
@@ -78,8 +66,7 @@ class ProcessDebtTest extends TestCase
         ];
     }
 
-    /** @test */
-    public function valid_to_publish_ticket_in_email()
+    public function testValidToPublishTicketInEmail()
     {
         $processDebtService = app()->make(ProcessDebtService::class);
 
@@ -88,8 +75,7 @@ class ProcessDebtTest extends TestCase
         $this->assertTrue($publish);
     }
 
-     /** @test */
-    public function test_get_title_for_request_file_csv()
+    public function testGetTitleForRequestFileCsv()
     {
         $request = new Request();
 
@@ -101,12 +87,11 @@ class ProcessDebtTest extends TestCase
 
     }
 
-     /** @test */
-    public function valid_process_list_of_debts()
+    public function testValidProcessListOfDebts()
     {
         $processDebtService = app()->make(ProcessDebtService::class);
 
-        $name = $this->create_file_csv();
+        $name = $this->createFileCsv();
 
         $process = $processDebtService->processListDebtJob(str_replace('.csv', "", $name));
 

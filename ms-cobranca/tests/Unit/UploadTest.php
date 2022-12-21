@@ -4,13 +4,14 @@ namespace Tests\Unit;
 
 use App\Services\UploadService;
 use Illuminate\Support\Facades\Storage;
+use File;
 use Tests\TestCase;
 use Illuminate\Http\UploadedFile;
 use Symfony\Component\HttpFoundation\File\UploadedFile as SymfonyUploadedFile;
 
 class UploadTest extends TestCase
 {
-    public function create_file_csv_to_test(): string
+    public function createFileCsvToTest(): string
     {
         $name = date("Y_m_d_H_i_s")."_test.csv";
 
@@ -31,33 +32,25 @@ class UploadTest extends TestCase
         return $name;
     }
 
-    public function delete_file_to_test($name): void
+    public function deleteFileToTest($name): void
     {
         Storage::delete($name);
     }
 
-
-    /** @test */
-    public function validate_can_upload_and_salve_in_storage()
+    public function testValidateCanUploadAndSalveInStorage()
     {
-        $name = $this->create_file_csv_to_test();
+        $name = $this->createFileCsvToTest();
 
         $uploadService = app()->make(UploadService::class);
 
-        $files = array_map('pathinfo', \File::files(storage_path('app')));
+        $fakeFile = new SymfonyUploadedFile(storage_path('app/').$name, $name, 'csv' );
 
-        foreach ($files as $file) {
-            if ($file['extension'] === 'csv' && $file['basename'] == $name)
-            {
-                $fakeFile = new SymfonyUploadedFile(storage_path('app/').$name, $file['basename'], 'csv' );
+        $attach = UploadedFile::createFromBase($fakeFile, false);
 
-                $anexo = UploadedFile::createFromBase($fakeFile, false);
+        $storedFile = $uploadService->storeFile($attach);
 
-                $store = $uploadService->storeFile($anexo);
+        $this->assertTrue($storedFile);
 
-                $this->assertTrue($store);
-            }
-        }
+        $this->deleteFileToTest($name);
     }
-
 }

@@ -3,16 +3,11 @@
 namespace Tests\Unit;
 
 use App\Services\TicketService;
-use PHPUnit\Framework\TestCase;
-// use GuzzleHttp\Client;
-// use GuzzleHttp\Handler\MockHandler;
-// use GuzzleHttp\HandlerStack;
-// use GuzzleHttp\Psr7\Response;
-// // use GuzzleHttp\Psr7\Request;
-// use GuzzleHttp\Exception\RequestException;
+use PHPUnit\TestCase;
 use Illuminate\Http\Request as Request;
+use Tests\TestCase as TestsTestCase;
 
-class TicketTest extends TestCase
+class TicketTest extends TestsTestCase
 {
     public function getTicketIntegrated()
     {
@@ -37,7 +32,7 @@ class TicketTest extends TestCase
     {
         return [
             "name" => "John Doe1",
-            "governmentId" => 11111111111,
+            "governmentId" => "11.111.111/0001-01",
             "email" => "johndoe@kanastra.com.br",
             "debtAmount" => 1000000.0,
             "debtDueDate" => "2022-10-12",
@@ -45,10 +40,8 @@ class TicketTest extends TestCase
         ];
     }
     
-    /** @test */
-    public function parse_data_ticket_to_format_checkout()
+    public function testParseDataTicketToFormatCheckout()
     {
-
         $ticket = [
             'debtId'   => rand(1,9999),
             'paidAt'   => "2022-06-09 10:00:00",
@@ -64,8 +57,7 @@ class TicketTest extends TestCase
         $this->assertIsArray($arrayReturn);
     }
 
-    /** @test */
-    public function find_ticket_for_debtId()
+    public function testFindTicketForDebtId()
     {
         $ticketService = app()->make(TicketService::class);
 
@@ -74,8 +66,7 @@ class TicketTest extends TestCase
         $this->assertIsInt($tickedId);
     }
 
-    /** @test */
-    public function update_ticket_whith_data_on_request()
+    public function testUpdateTicketWhithDataOnRequest()
     {
         $data = [
             "debtId" => "68063719816",
@@ -93,23 +84,20 @@ class TicketTest extends TestCase
         $this->assertTrue($updated);
     }
 
-    /** @test */
-    //error ainda validar porque esta extendendo outra class
-    // public function store_ticket_whith_data_on_csvList_integrate()
-    // {
-        // $data = $this->getTicketIntegrated();
+    public function testStoreTicketWhithDataOnCsvListIntegrate()
+    {
+        $data = $this->getTicketIntegrated();
 
-        // $charge = $this->getCharge();
+        $charge = $this->getCharge();
 
-    //     $ticketService = app()->make(TicketService::class);
+        $ticketService = app()->make(TicketService::class);
 
-    //     $ticket = $ticketService->storeTicket(array_merge($data, $charge));
+        $ticket = $ticketService->storeTicket(array_merge($data, $charge));
 
-    //     $this->assertIsInt($ticket->ticketId);
-    // }
+        $this->assertIsInt($ticket->ticketId);
+    }
 
-    /** @test */
-    public function parse_data_on_csvList_integrate_to_insert()
+    public function testParseDataOnCsvListIntegrateToInsert()
     {
         $data = $this->getTicketIntegrated();
 
@@ -122,22 +110,29 @@ class TicketTest extends TestCase
         $this->assertIsArray($ticketParsed);
     }
 
-    // /** @test */
-    public function validate_data_on_csvList_to_storage_to_ticket()
+    public function testValidateDataOnCsvListToStorageToTicket()
     {
         $charge = $this->getCharge();
 
-        $data = $this->getTicketIntegrated();
+        $data = [
+            "debtId" => 8291,
+            "customerId" => 248,
+            "governmentId" => "11.111.111/0001-01",
+            "amount" => 1000000.0,
+            "debtDueDate" => "2022-10-12",
+            "bankId" => 1,
+            "barCode" => "7672404584 83414934236 6548964631668",
+            "status" => 0
+        ];
 
         $ticketService = app()->make(TicketService::class);
 
-        $validation = $ticketService->validateTicket(array_merge($data, $charge));
+        $validation = $ticketService->validateTicket(array_merge($data, $charge, ));
 
         $this->assertTrue($validation);
     }
 
-    /** @test */
-    public function check_was_checkoutTicket_is_working()
+    public function testCheckWasCheckoutTicketIsWorking()
     {   
         $request = new Request();
 
