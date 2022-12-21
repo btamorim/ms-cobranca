@@ -11,6 +11,37 @@ class UploadController extends Controller
 {
     public function UploadCharges(UploadRequest $request)
     {
-       
+        try {
+
+            if (!$request->hasFile('listDebt')) {
+
+                return response()->json([
+                    'statusCode' => StatusService::STATUS_CODE_ERRO,
+                    'msg' => 'The list of debts has not process!'
+                ], 400);
+            }
+
+            $uploadService = app()->make(UploadService::class);
+
+            if(!$uploadService->storeFile($request)) 
+            {
+                return response()->json([
+                    'statusCode' => $uploadService->statusCode,
+                    'msg' => $uploadService->msg,
+                    'error' => $uploadService->error,
+                ], 400);
+            }
+
+            return response()->json([
+                'statusCode' => StatusService::STATUS_CODE_SUCCESSO,
+                'msg' => 'The list of debits has been processed!'
+            ], 200);
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                'statusCode' => StatusService::STATUS_CODE_ERRO,
+                'msg' => $th->getMessage()
+            ], 400);
+        }
     }
 }
