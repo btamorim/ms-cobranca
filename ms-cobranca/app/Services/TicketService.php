@@ -153,7 +153,7 @@ class TicketService implements ITicketInterface
 
             return $this->ticketRepository->save($ticketDTO);
 
-        } catch (Throwable $th) {dd($th->getMessage());
+        } catch (Throwable $th) {
             $this->statusCode = StatusServiceEnum::STATUS_CODE_ERRO;
             $this->msg = $th->getMessage();
 

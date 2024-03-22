@@ -29,7 +29,7 @@ class UploadService implements IUploadInterface
             dispatch(new ProcessListDebt());
             return true;
 
-        } catch (Throwable $th) {dd('error', $th->getMessage());
+        } catch (Throwable $th) {
             $this->msg = "problem writing the file!";
             $this->statusCode = StatusServiceEnum::STATUS_CODE_ERRO;
             $this->errorCode = $th->getCode();

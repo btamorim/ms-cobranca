@@ -30,5 +30,9 @@ return [
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
-
+    'ticket' => [
+        'url' => env('INTEGRATE_TICKET_URL', null),
+        'key' => env('KEY_SERVICE', 'aaaaa'),
+        'appKey' => env('APP_KEY', '')
+    ]
 ];

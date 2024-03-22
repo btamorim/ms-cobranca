@@ -9,5 +9,4 @@ interface ITicketInterface
     public function checkoutDebit(): bool;
 
     public function checkoutTicket(Request $request);
-
 }

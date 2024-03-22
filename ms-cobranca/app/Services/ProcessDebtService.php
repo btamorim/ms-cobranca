@@ -38,6 +38,8 @@ class ProcessDebtService implements IProcessDebtInterface
         $this->ticketService = $ticketService;
         $this->debtService = $debtService;
 
+        $this->initializeServiceProperties();
+
        /** Maintain the formatting of the CSV title. */
         HeadingRowFormatter::default('none');
     }

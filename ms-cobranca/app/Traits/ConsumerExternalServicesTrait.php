@@ -9,31 +9,41 @@ use GuzzleHttp\Exception\BadResponseException;
 
 trait ConsumerExternalServicesTrait
 {
+    private string $ticketUrl;
+    private string $key;
+    private string $appKey;
+    private Client $client;
+
+    private function initializeServiceProperties()
+    {
+        $this->ticketUrl = config('services.ticket.url');
+        $this->key = config('services.ticket.key');
+        $this->appKey = config('services.ticket.appKey');
+
+        $this->client = new Client();
+    }
+
+    public function __construct()
+    {
+        $this->initializeServiceProperties();
+    }
+
     public function performRequest($method, $requestUrl, $data = [])
     {
         try {
-
-            $client = app()->make(Client::class);
-
-            $baseUrl = getenv('INTEGRATE_TICKET_URL');
-
-            $key = getenv('KEY_SERVICE');
-
-            $appKey = getenv('APP_KEY');
-
-            if (isset($key)) {
-                $headers['Authorization'] = $key;
+            if (isset($this->key)) {
+                $headers['Authorization'] = $this->key;
                 $headers['Content-Type']  = 'application/json';
             }
 
-            if (isset($appKey)) {
-                $headers['AppKey'] = $appKey;
+            if (isset($this->appKey)) {
+                $headers['AppKey'] = $this->appKey;
             }
 
             /**
              * if it was a real application it would be ready to send
              */
-            //$response = $client->request('POST', $baseUrl, ['body' => $data, 'headers' => $headers]);
+            //$response = $client->request('POST', $this->baseUrl, ['body' => $data, 'headers' => $headers]);
 
             //create a fakeResponse
             $response = new Response(200, ['X-Header' => 'hoge'], $this->responseFakeData($data));
