@@ -2,14 +2,15 @@
 
 namespace App\Jobs;
 
-use App\Mail\notificationChargeTicket;
+use Throwable;
 use App\Traits\Log;
 use Illuminate\Bus\Queueable;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\notificationChargeTicket;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Mail;
 
 class notificationChargeCustomer implements ShouldQueue
 {
@@ -36,9 +37,8 @@ class notificationChargeCustomer implements ShouldQueue
     {
         try {
             Mail::to($this->attributes['email'])->send(new notificationChargeTicket($this->attributes));
-        } catch (\Throwable $th) {
-            // $log
+        } catch (Throwable $th) {
+            $this->storeLogData(['message' => $th->getMessage()], "error_send_charge_notification");
         }
-        
     }
 }

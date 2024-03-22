@@ -10,5 +10,4 @@ interface ITicketInterface
 
     public function checkoutTicket(Request $request);
 
-
 }

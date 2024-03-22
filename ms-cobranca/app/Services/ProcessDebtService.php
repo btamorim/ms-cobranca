@@ -2,75 +2,100 @@
 
 namespace App\Services;
 
-use App\Contracts\IProcessDebtInterface;
-use App\Imports\ChargesImport;
-use App\Jobs\notificationChargeCustomer;
-use App\Traits\ConsumerExternalServicesTrait;
+use Exception;
+use Throwable;
 use App\Traits\Log;
+use App\DTO\ChargeDTO;
 use Illuminate\Http\Request;
-use Maatwebsite\Excel\HeadingRowImport;
+use App\Services\DebtService;
+use App\Imports\ChargesImport;
+use App\Services\TicketService;
 use Maatwebsite\Excel\Facades\Excel;
-use Maatwebsite\Excel\Validators\ValidationException;
-use Maatwebsite\Excel\Imports\HeadingRowFormatter;
+use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\HeadingRowImport;
+use App\Contracts\IProcessDebtInterface;
+use App\Jobs\notificationChargeCustomer;
 use Maatwebsite\Excel\Concerns\Importable;
+use App\Traits\ConsumerExternalServicesTrait;
+use Maatwebsite\Excel\Imports\HeadingRowFormatter;
+use Maatwebsite\Excel\Validators\ValidationException;
 
 class ProcessDebtService implements IProcessDebtInterface
 {
     use Importable, ConsumerExternalServicesTrait, Log;
-    
+
     public $statusCode;
     public $msg;
     public $errorCode;
+    private TicketService $ticketService;
+    private DebtService $debtService;
 
-    public function __construct()
+    public function __construct(
+        TicketService $ticketService,
+        DebtService $debtService
+    )
     {
-        //não mudar formatação do titulo do csv
+        $this->ticketService = $ticketService;
+        $this->debtService = $debtService;
+
+       /** Maintain the formatting of the CSV title. */
         HeadingRowFormatter::default('none');
     }
-    
-    /**
-     * caso procise alterar a linha de titulo
-     */
+
     public function headingRow(): int
     {
         return 1;
     }
 
-    public function processListDebtJob(string $fileName): bool
+    public function processListDebtJob(array $files): void
+    {
+        foreach ($files as $file) {
+            if(!$this->validateExtension($file['extension'])){
+                return;
+            }
+
+            if($this->processCsv($file['filename'])) {
+                Storage::disk('local')->delete($file['basename']);
+            }
+        }
+    }
+
+    public function validateExtension(string $extension): bool
+    {
+        if ($extension === 'csv')
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function processCharge(ChargeDTO $chargeDTO)
     {
         try {
-            $charges = $this->importCsv($fileName);
-
-            foreach ($charges[0] as $charge) {
-
-                $response = $this->performRequest('POST', 'transactions', $charge);
+                $response = $this->performRequest('POST', 'transactions', $chargeDTO->toArray());
 
                 if(!isset($response['status']))
                 {
                     $this->storeLogData($response, "error_request_integrate_ticket");
-                    
-                    continue;
                 }
 
-                $ticketService = app()->make(TicketService::class);
+                $ticket = $this->ticketService->storeTicket(array_merge($response['data'], $chargeDTO->toArray()));
 
-                $ticket = $ticketService->storeTicket(array_merge($response['data'], $charge));
+                if(! $this->debtService->updateDebt($ticket->ticketId, $chargeDTO->debtId))
+                {
+                    throw new Exception("Error to Update debt", 400);
 
-                $debtService = app()->make(DebtService::class);
+                }
 
-                $debtService->updateDebt($ticket->ticketId, $charge['debtId']);
-
-                if(!$this->publishTicketMail($charge))
+                if(!$this->publishTicketMail($chargeDTO))
                 {
                     return false;
                 }
 
                 return true;
-            }
 
-            return true;
-            
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $this->statusCode = StatusServiceEnum::STATUS_CODE_ERRO;
             $this->msg = $th->getMessage();
             $this->errorCode = $th->getCode();
@@ -79,19 +104,51 @@ class ProcessDebtService implements IProcessDebtInterface
         }
     }
 
-    public function importCsv(string $fileName): ?array
+    private function sanitizeData(array $line): array {
+        $line = array_map(function($value) {
+            return preg_replace('/["\']/', '', $value);
+        }, $line);
+        unset($value);
+
+        return $line;
+    }
+
+    public function processCsv(string $fileName): bool
     {
         try {
+            $file = fopen(Storage::path('').'/'.$fileName.'.csv', 'r');
 
-            $charges = Excel::toArray(new ChargesImport, $fileName.'.csv');
+            $firstLine = null;
+            $fist = true;
+            while (($line = fgetcsv($file, 0, ',', "'")) !== false)
+            {
+                if($fist){
+                    $fist = false;
+                    $firstLine = $this->sanitizeData($line);
+                    continue;
+                }
 
-            return $charges;
+                $data = $this->sanitizeData($line);
+
+                $chargeDTO = new ChargeDTO(
+                    name: $data[0],
+                    governmentId: $data[1],
+                    email: $data[2],
+                    debtAmount: $data[3],
+                    debtDueDate: $data[4],
+                    debtId: $data[5]
+                );
+
+                $this->processCharge($chargeDTO);
+            }
+
+            return true;
 
         } catch (ValidationException $e) {
             $failures = $e->failures();
-            
+
             $errors = [];
-            
+
             foreach ($failures as $failure) {
                 $failure->row();
                 $failure->attribute();
@@ -106,12 +163,15 @@ class ProcessDebtService implements IProcessDebtInterface
 
             return false;
 
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $this->statusCode = StatusServiceEnum::STATUS_CODE_ERRO;
             $this->msg = $th->getMessage();
             $this->errorCode = 400;
 
             return false;
+
+        } finally {
+            fclose($file);
         }
     }
 
@@ -129,9 +189,9 @@ class ProcessDebtService implements IProcessDebtInterface
 
         } catch (ValidationException $e) {
             $failures = $e->failures();
-            
+
             $errors = [];
-            
+
             foreach ($failures as $failure) {
                 $failure->row();
                 $failure->attribute();
@@ -146,7 +206,7 @@ class ProcessDebtService implements IProcessDebtInterface
 
             return false;
 
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $this->statusCode = StatusServiceEnum::STATUS_CODE_ERRO;
             $this->msg = $th->getMessage();
             $this->errorCode = 400;
@@ -170,7 +230,7 @@ class ProcessDebtService implements IProcessDebtInterface
 
         if (empty($title))
         {
-            throw new \Exception("Uploaded file is empty!", 400);
+            throw new Exception("Uploaded file is empty!", 400);
         }
         else if(empty($diff)){
 
@@ -178,7 +238,7 @@ class ProcessDebtService implements IProcessDebtInterface
         }
         else
         {
-            throw new \Exception("The data sent does not match what was expected!", 400);
+            throw new Exception("The data sent does not match what was expected!", 400);
         }
 
         return false;
@@ -195,7 +255,7 @@ class ProcessDebtService implements IProcessDebtInterface
 
             return $title[0][0];
 
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
 
             $this->statusCode = StatusServiceEnum::STATUS_CODE_ERRO;
             $this->msg = "Invalid Spreadsheet file";
@@ -203,17 +263,17 @@ class ProcessDebtService implements IProcessDebtInterface
 
             return [];
         }
-        
+
     }
 
-    public function publishTicketMail(array $attributes): bool
+    public function publishTicketMail(ChargeDTO $attributesDTO): bool
     {
         try {
-            notificationChargeCustomer::dispatch($attributes);
-            
-        } catch (\Throwable $th) {
+            notificationChargeCustomer::dispatch($attributesDTO->toArray());
+
+        } catch (Throwable $th) {
             $this->storeLogData(['message' => $th->getMessage()], "error_request_integrate_ticket");
-            
+
             return false;
         }
 

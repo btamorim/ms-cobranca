@@ -3,12 +3,15 @@
 namespace App\Services;
 
 
+use Throwable;
+use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use App\Contracts\IUploadInterface;
 use App\Http\Requests\UploadRequest;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use League\Flysystem\UnableToWriteFile;
+use App\Jobs\ProcessListDebt;
+use Ramsey\Uuid\Uuid;
 
 class UploadService implements IUploadInterface
 {
@@ -17,27 +20,16 @@ class UploadService implements IUploadInterface
     public int $errorCode;
     public string $error;
 
-    public function __construct()
-    {
-
-    }
-
     public function storeFile(UploadedFile $request): bool
     {
         try {
-            Storage::disk('local')->put('', $request);
+            $path = Storage::disk('local')->putFileAs('', $request, Uuid::uuid4()->toString().'.csv');
+            chmod(storage_path('app/' . $path), 0777);
 
+            dispatch(new ProcessListDebt());
             return true;
 
-        } catch (UnableToWriteFile $e) {
-            $this->msg = "problem writing the file!";
-            $this->statusCode = StatusServiceEnum::STATUS_CODE_ERRO;
-            $this->errorCode = $e->getCode();
-            $this->error = $e->getMessage();
-
-            return false;
-
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {dd('error', $th->getMessage());
             $this->msg = "problem writing the file!";
             $this->statusCode = StatusServiceEnum::STATUS_CODE_ERRO;
             $this->errorCode = $th->getCode();
@@ -46,5 +38,4 @@ class UploadService implements IUploadInterface
             return false;
         }
     }
-
 }

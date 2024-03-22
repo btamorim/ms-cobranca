@@ -2,15 +2,18 @@
 
 namespace App\Services;
 
-use App\Contracts\ITicketInterface;
-use App\Http\Requests\TicketRequest;
+use Exception;
+use Throwable;
+use PDOException;
+use App\DTO\TicketDTO;
 use App\Models\Ticket;
 use Illuminate\Http\Request;
+use App\Contracts\ITicketInterface;
+use App\Http\Requests\TicketRequest;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Validator;
+use App\Contracts\ITicketRepositoryInterface;
 use Illuminate\Validation\ValidationException;
-
-// use App\Repositories\AdditionRepository;
 
 class TicketService implements ITicketInterface
 {
@@ -19,10 +22,8 @@ class TicketService implements ITicketInterface
     public int $errorCode;
     public string $error;
 
-    public function __construct()
-    {
-
-    }
+    public function __construct(public readonly ITicketRepositoryInterface $ticketRepository)
+    {}
 
     public function checkoutDebit(): bool
     {
@@ -32,7 +33,7 @@ class TicketService implements ITicketInterface
     public function checkoutTicket(Request $request): bool
     {
         try {
-        
+
             $data = $request->all();
 
             $dataPayment = $this->parseTicketCheckout($data);
@@ -40,7 +41,7 @@ class TicketService implements ITicketInterface
             $ticketId = $this->findTicket($data['debtId']);
 
             if (empty($dataPayment))
-            {   
+            {
                 return false;
             }
 
@@ -53,7 +54,7 @@ class TicketService implements ITicketInterface
 
             return true;
 
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $this->msg        = $th->getMessage();
             $this->errorCode  = $th->getCode();
             $this->statusCode = StatusServiceEnum::STATUS_CODE_ERRO;
@@ -67,9 +68,9 @@ class TicketService implements ITicketInterface
     {
         try{
 
-            if (!$amount = floatval($request['paidAmount'])) 
+            if (!$amount = floatval($request['paidAmount']))
             {
-                throw new \Exception("The value is not supported", 1);
+                throw new Exception("The value is not supported", 1);
             }
 
             $ticket = [
@@ -79,123 +80,85 @@ class TicketService implements ITicketInterface
                 'amount'   => number_format($amount, 2),
                 'statusId' => 1,
             ];
-                
+
             return $ticket;
 
-        } catch (\Throwable $th) {
-            
+        } catch (Throwable $th) {
+
             $this->msg = $th->getMessage();
             $this->errorCode  = 422;
             $this->statusCode = StatusServiceEnum::STATUS_CODE_ERRO;
-            
-            return false;            
+
+            return false;
         }
     }
 
     public function findTicket(int $debtId): int
     {
         try {
-        
-            /**
-             * find in BD this ticket for debtId, but create a fake to run project
-             */
-            // $ticket = Ticket::where('debitId', $debtId)->firstOrFail();
-            
-            // return $ticket->ticketId;
+            $ticket = $this->ticketRepository->findByDebtId($debtId);
 
-            return rand(1, 99999);
-        
+            return $ticket->id;
+
         } catch (QueryException $e) {
 
-            throw new \Exception("Ticket not found", 404);
+            throw new Exception("Ticket not found", 404);
 
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
 
-            throw new \PDOException("Error connecting to DB", 409);
-   
-        } catch (\Throwable $e) {
+            throw new PDOException("Error connecting to DB", 409);
 
-            throw new \Exception($e->getMessage(), $e->getCode());
+        } catch (Throwable $e) {
+
+            throw new Exception($e->getMessage(), $e->getCode());
 
         }
     }
 
     public function updateTicket(int $ticketId, array $data): bool
     {
-        if (!empty($ticketId))
-        {
-            try {
 
-                /**
-                 * UPDATE in BD this ticket, but create a fake to run project
-                 */
-                // $ticket = Ticket::where('ticketId', $ticketId)->update($data);
-                
-                $this->statusCode = StatusServiceEnum::STATUS_CODE_SUCCESSO->value;
-                $this->msg = 'Ticket downloaded successfully.';
+        try {
+            $this->ticketRepository->update($ticketId, $data);
 
-                return true;
-            
-            } catch (\Throwable $th) {
-                $this->statusCode = StatusServiceEnum::STATUS_CODE_ERRO->value;
-                $this->msg = "It was not possible to download the ticket. Error: {$th->getMessage()}";
+            $this->statusCode = StatusServiceEnum::STATUS_CODE_SUCCESSO->value;
+            $this->msg = 'Ticket downloaded successfully.';
 
-            }
-        }
-        else
-        {
-            $this->statusCode = StatusServiceEnum::STATUS_CODE_ERRO;
-            $this->msg = 'Ticket not found.';
+            return true;
+
+        } catch (Throwable $th) {
+            $this->statusCode = StatusServiceEnum::STATUS_CODE_ERRO->value;
+            $this->msg = "It was not possible to download the ticket. Error: {$th->getMessage()}";
 
         }
 
         return false;
-                    
     }
 
-    public function storeTicket(array $data): Ticket
+    public function storeTicket(array $data): ?Ticket
     {
         try {
 
-            $dataTicket = $this->parseTicketInsert($data);
+            $ticketDTO = new TicketDTO(
+                debtId: $data['debtId'],
+                governmentId: $data['cpf_cnpj'],
+                amount: $data['debtAmount'],
+                debtDueDate: $data['debtDueDate'],
+                barCode: $data['bar_code'],
+                bankId: 1,
+                customerId: rand(1, 900),
+            );
 
-            $this->validateTicket($dataTicket);
+            $this->validateTicket($ticketDTO->toArray());
 
-            $ticket = new Ticket();
+            return $this->ticketRepository->save($ticketDTO);
 
-            $ticket->fill($dataTicket);
-
-            /**
-             * this create a ticket obejct, but fake() is comment
-             */
-            // $ticket->save();
-
-            //simulation id BD
-            $ticket->ticketId = rand(1,99999);
-
-            return $ticket;
-
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {dd($th->getMessage());
             $this->statusCode = StatusServiceEnum::STATUS_CODE_ERRO;
             $this->msg = $th->getMessage();
 
             return false;
         }
-
-    }
-
-    public function parseTicketInsert(array $data)
-    {
-        return [
-            "debtId" => $data['debtId'],
-            "customerId" => rand(1, 900),
-            "governmentId" => $data['cpf_cnpj'],
-            "amount" => $data['debtAmount'],
-            "debtDueDate" => $data['debtDueDate'],
-            "bankId" => 1,
-            "barCode" => $data['bar_code'],
-            "status" => 0,
-        ];
     }
 
     public function validateTicket(array $attributes): bool
@@ -208,7 +171,7 @@ class TicketService implements ITicketInterface
 
         $validator = Validator::make($attributes, $rules, $message);
 
-        if ($validator->fails())
+        if($validator->fails())
             throw new ValidationException($validator);
 
         return true;

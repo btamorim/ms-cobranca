@@ -2,9 +2,10 @@
 
 namespace App\Traits;
 
+use Throwable;
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Exception\BadResponseException;
 
 trait ConsumerExternalServicesTrait
 {
@@ -50,7 +51,7 @@ trait ConsumerExternalServicesTrait
                 "status" => false
             ];
 
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             return [
                 "code" => $th->getCode(),
                 "data" => $th->getMessage(),

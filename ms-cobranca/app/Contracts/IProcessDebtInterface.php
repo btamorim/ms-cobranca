@@ -6,5 +6,5 @@ use Illuminate\Http\Request;
 
 interface IProcessDebtInterface
 {
-    public function processListDebtJob(string $fileName): bool;  
+    public function processListDebtJob(array $files): void;
 }
