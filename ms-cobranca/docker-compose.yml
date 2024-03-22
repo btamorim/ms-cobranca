@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  php:
+    build: .
+    container_name: cobranca-php
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "8000:80"
+    networks:
+      - php
+networks:
+  php:
+    driver: bridge
