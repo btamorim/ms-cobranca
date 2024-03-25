@@ -10,10 +10,8 @@ use App\Services\TicketService;
 class TicketController extends Controller
 {
 
-    public function __construct(TicketService $service)
-    {
-        $this->service = $service;
-    }
+    public function __construct(private readonly TicketService $ticketService)
+    {}
 
     /**
      * receive confirmation of ticket creation
@@ -23,21 +21,21 @@ class TicketController extends Controller
      */
     public function paymentConfirmation(TicketRequest $request)
     {
-        $ticketService = app()->make(TicketService::class);
+        $data = $request->parseToDTO();
 
-        $ticketService->checkoutTicket($request);
-        
-        if ($ticketService->statusCode == 'ERROR') {
+        $this->ticketService->checkoutTicket($data);
+
+        if ($this->ticketService->statusCode == 'ERROR') {
 
             return response()->json([
-                'statusCode' => $ticketService->statusCode,
-                'msg' => $ticketService->msg
-            ], !empty($ticketService->errorCode) ? $ticketService->errorCode : 422);
+                'statusCode' => $this->ticketService->statusCode,
+                'msg' => $this->ticketService->msg
+            ], !empty($this->ticketService->errorCode) ? $this->ticketService->errorCode : 422);
         }
 
         return response()->json([
-            'statusCode' => $ticketService->statusCode,
-            'msg' => $ticketService->msg,
+            'statusCode' => $this->ticketService->statusCode,
+            'msg' => $this->ticketService->msg,
         ]);
 
     }

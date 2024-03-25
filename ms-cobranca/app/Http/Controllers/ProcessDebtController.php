@@ -13,7 +13,7 @@ class ProcessDebtController extends Controller
     {
         try {
 
-            dispatch(new ProcessListDebt())->delay(3);
+            dispatch(new ProcessListDebt());
 
             return response()->json([
                 'statusCode' => StatusServiceEnum::STATUS_CODE_SUCCESSO,

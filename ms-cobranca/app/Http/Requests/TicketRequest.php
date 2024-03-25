@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 
+use Carbon\Carbon;
+use App\DTO\TicketCheckoutDTO;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Http\Requests\FormRequestFailedValidation;
 
@@ -11,21 +13,11 @@ class TicketRequest extends FormRequest
 
     use FormRequestFailedValidation;
 
-    /**
-     * Determine if the user is authorized to make this request.
-     *
-     * @return bool
-     */
     public function authorize()
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
     public function rules()
     {
         return [
@@ -36,23 +28,17 @@ class TicketRequest extends FormRequest
         ];
     }
 
-    public function createTicketRules()
+    public function parseToDTO()
     {
-        return [
-            'debtId' => 'required|numeric',
-            'customerId' => 'required|numeric',
-            'governmentId' => 'required|string',
-            'amount' => 'required|numeric',
-            'debtDueDate' => 'required|date'
+        $data = $this->validate($this->rules());
 
-        ];
+        return new TicketCheckoutDTO(
+            debtId: $data['debtId'],
+            paidAmount: $data['paidAmount'],
+            paidAt: Carbon::make($data['paidAt']),
+            paidBy: $data['paidBy'],
+        );
     }
-
-    /**
-     * Get the error messages for the defined validation rules.
-     *
-     * @return array
-     */
     public function messages()
     {
         return [
@@ -60,10 +46,6 @@ class TicketRequest extends FormRequest
             'paidAt.required' => 'This :attribute field is required. Enter the billing payment date.',
             'paidAmount.required' => 'This :attribute field is required. Enter the payment amount.',
             'paidBy.required' => 'This :attribute field is required. Enter the name of the customer who made the payment.',
-            'governmentId' => 'This :attribute field is required. Enter the customers CPF.',
-            'amount' => 'This :attribute field is required. Enter the ticket amount correctly.',
-            'debtDueDate' => 'This :attribute field is required. Enter the correct expiration date.',
-            'customerId' => 'This :attribute field is required. Enter the customer code.'
-        ]; 
+        ];
     }
 }
