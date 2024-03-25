@@ -24,7 +24,7 @@ class TicketTest extends TestsTestCase
             "valor_cobrado" => 1000000,
             "data_venc" => "2022-10-12",
             "valor_total_boleto" => 1000003.51,
-            "bar_code" => "54392099001 74250034798 6548964631668"           
+            "bar_code" => "54392099001 74250034798 6548964631668"
         ];
     }
 
@@ -39,7 +39,7 @@ class TicketTest extends TestsTestCase
             "debtId" => 8291
         ];
     }
-    
+
     public function testParseDataTicketToFormatCheckout()
     {
         $ticket = [
@@ -133,7 +133,7 @@ class TicketTest extends TestsTestCase
     }
 
     public function testCheckWasCheckoutTicketIsWorking()
-    {   
+    {
         $request = new Request();
 
         $data = [
@@ -152,5 +152,5 @@ class TicketTest extends TestsTestCase
         $this->assertTrue($validation);
 
     }
-    
+
 }

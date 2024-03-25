@@ -5,18 +5,25 @@ namespace App\Services;
 use Exception;
 use Throwable;
 use PDOException;
+use App\Traits\Log;
+use App\DTO\ChargeDTO;
 use App\DTO\TicketDTO;
 use App\Models\Ticket;
 use Illuminate\Http\Request;
+use App\DTO\TicketCheckoutDTO;
 use App\Contracts\ITicketInterface;
+use App\Services\StatusServiceEnum;
 use App\Http\Requests\TicketRequest;
 use Illuminate\Database\QueryException;
+use App\Jobs\notificationChargeCustomer;
 use Illuminate\Support\Facades\Validator;
 use App\Contracts\ITicketRepositoryInterface;
 use Illuminate\Validation\ValidationException;
 
 class TicketService implements ITicketInterface
 {
+    use Log;
+
     public string $statusCode;
     public $msg;
     public int $errorCode;
@@ -30,27 +37,12 @@ class TicketService implements ITicketInterface
         return true;
     }
 
-    public function checkoutTicket(Request $request): bool
+    public function checkoutTicket(TicketCheckoutDTO $ticketCheckoutDTO): bool
     {
         try {
+            $ticketId = $this->findTicket($ticketCheckoutDTO->debtId);
 
-            $data = $request->all();
-
-            $dataPayment = $this->parseTicketCheckout($data);
-
-            $ticketId = $this->findTicket($data['debtId']);
-
-            if (empty($dataPayment))
-            {
-                return false;
-            }
-
-            $checkoutTick = $this->updateTicket($ticketId, $dataPayment);
-
-            if (!$checkoutTick)
-            {
-                return false;
-            }
+            $checkoutTick = $this->updateTicket($ticketId, $ticketCheckoutDTO->toArray());
 
             return true;
 
@@ -64,41 +56,12 @@ class TicketService implements ITicketInterface
 
     }
 
-    public function parseTicketCheckout(Array $request): ?array
-    {
-        try{
-
-            if (!$amount = floatval($request['paidAmount']))
-            {
-                throw new Exception("The value is not supported", 1);
-            }
-
-            $ticket = [
-                'debtId'   => $request['debtId'],
-                'paidAt'   => $request['paidAt'],
-                'paidBy'   => $request['paidBy'],
-                'amount'   => number_format($amount, 2),
-                'statusId' => 1,
-            ];
-
-            return $ticket;
-
-        } catch (Throwable $th) {
-
-            $this->msg = $th->getMessage();
-            $this->errorCode  = 422;
-            $this->statusCode = StatusServiceEnum::STATUS_CODE_ERRO;
-
-            return false;
-        }
-    }
-
     public function findTicket(int $debtId): int
     {
         try {
             $ticket = $this->ticketRepository->findByDebtId($debtId);
 
-            return $ticket->id;
+            return $ticket->ticketId;
 
         } catch (QueryException $e) {
 
@@ -175,6 +138,17 @@ class TicketService implements ITicketInterface
             throw new ValidationException($validator);
 
         return true;
+    }
 
+    public function publishTicketMail(ChargeDTO $attributesDTO):void
+    {
+        try {
+            notificationChargeCustomer::dispatch($attributesDTO->toArray());
+
+        } catch (Throwable $th) {
+            $this->storeLogData(['message' => $th->getMessage()], "error_dispaching_ticket_mail");
+
+            throw $th;
+        }
     }
 }
