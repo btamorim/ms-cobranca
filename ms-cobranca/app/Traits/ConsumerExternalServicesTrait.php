@@ -12,7 +12,6 @@ trait ConsumerExternalServicesTrait
     private string $ticketUrl;
     private string $key;
     private string $appKey;
-    private Client $client;
 
     private function initializeServiceProperties()
     {
@@ -23,7 +22,7 @@ trait ConsumerExternalServicesTrait
         $this->client = new Client();
     }
 
-    public function __construct()
+    public function __construct(private readonly Client $client)
     {
         $this->initializeServiceProperties();
     }
@@ -41,7 +40,7 @@ trait ConsumerExternalServicesTrait
             }
 
             /**
-             * if it was a real application it would be ready to send
+             * If it was a real app, it would be ready to submit for integration to generate the invoice
              */
             //$response = $client->request('POST', $this->baseUrl, ['body' => $data, 'headers' => $headers]);
 

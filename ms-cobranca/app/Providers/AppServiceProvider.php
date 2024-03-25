@@ -4,7 +4,9 @@ namespace App\Providers;
 
 use App\Services\DebtService;
 use App\Services\TicketService;
+use App\Services\InvoiceService;
 use App\Repository\DebtRepository;
+use App\Contracts\IInvoiceInterface;
 use App\Repository\TicketRepository;
 use App\Services\ProcessDebtService;
 use Illuminate\Support\ServiceProvider;
@@ -24,10 +26,12 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ProcessDebtService::class, function ($app) {
             $ticketService = $app->make(TicketService::class);
             $debtService = $app->make(DebtService::class);
+            $invoiceService = $app->make(IInvoiceInterface::class);
 
-            return new ProcessDebtService($ticketService, $debtService);
+            return new ProcessDebtService($ticketService, $debtService, $invoiceService);
         });
 
+        $this->app->bind(IInvoiceInterface::class, InvoiceService::class);
         $this->app->bind(ITicketInterface::class, TicketService::class);
         $this->app->bind(IDebtRepositoryInterface::class, DebtRepository::class);
         $this->app->bind(ITicketRepositoryInterface::class, TicketRepository::class);
