@@ -1,0 +1,7 @@
+"name,governmentId,email,debtAmount,debtDueDate,debtId"
+"'John Doe','11111111110','johndoe@meudominio.com.br','1000000.00','2022-10-12',8291"
+"'John Doe1','11111111111','johndoe@meudominio.com.br','1000000.01','2022-10-12',8292"
+"'John Doe2','11111111112','johndoe@meudominio.com.br','1000000.02','2022-10-12',8293"
+"'John Doe3','11111111113','johndoe@meudominio.com.br','1000000.03','2022-10-12',8294"
+"'John Doe4','11111111114','johndoe@meudominio.com.br','1000000.04','2022-10-12',8295"
+"'John Doe5','11111111115','johndoe@meudominio.com.br','1000000.05','2022-10-12',8296"

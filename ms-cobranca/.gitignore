@@ -4,6 +4,10 @@
 /public/storage
 /storage/*.key
 /vendor
+/logs/*
+/framework/*
+logs/*
+framework/*
 .env
 .env.backup
 .env.production
