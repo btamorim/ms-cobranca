@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\TicketRequest;
 use Illuminate\Http\Request;
-use App\Services\TicketService;
+use App\Contracts\ITicketInterface;
+use App\Http\Requests\TicketRequest;
 
 
 class TicketController extends Controller
 {
 
-    public function __construct(private readonly TicketService $ticketService)
+    public function __construct(private readonly ITicketInterface $ticketService)
     {}
 
     /**

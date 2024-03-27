@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use Throwable;
 use App\Jobs\ProcessListDebt;
 use App\Services\StatusService;
-use App\Services\UploadService;
 use Illuminate\Http\JsonResponse;
+use App\Contracts\IUploadInterface;
 use App\Services\StatusServiceEnum;
 use App\Http\Requests\UploadRequest;
 
@@ -14,7 +14,7 @@ use App\Http\Requests\UploadRequest;
 class UploadController extends Controller
 {
 
-    public function __construct(private readonly UploadService $uploadService)
+    public function __construct(private readonly IUploadInterface $uploadService)
     {}
 
     public function UploadCharges(UploadRequest $request): JsonResponse

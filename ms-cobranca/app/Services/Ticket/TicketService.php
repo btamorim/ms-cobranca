@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Ticket;
 
 use Exception;
 use Throwable;
@@ -112,8 +112,6 @@ class TicketService implements ITicketInterface
                 customerId: rand(1, 900),
             );
 
-            $this->validateTicket($ticketDTO->toArray());
-
             return $this->ticketRepository->save($ticketDTO);
 
         } catch (Throwable $th) {
@@ -122,22 +120,6 @@ class TicketService implements ITicketInterface
 
             return false;
         }
-    }
-
-    public function validateTicket(array $attributes): bool
-    {
-        $ticketRequest = new TicketRequest();
-
-        $rules = $ticketRequest->createTicketRules();
-
-        $message = $ticketRequest->messages();
-
-        $validator = Validator::make($attributes, $rules, $message);
-
-        if($validator->fails())
-            throw new ValidationException($validator);
-
-        return true;
     }
 
     public function publishTicketMail(ChargeDTO $attributesDTO):void

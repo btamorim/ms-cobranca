@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Debt;
 
 
 use Throwable;
@@ -29,7 +29,7 @@ class UploadService implements IUploadInterface
             dispatch(new ProcessListDebt());
             return true;
 
-        } catch (Throwable $th) {
+        } catch (Throwable $th) { dd('error:', $th->getMessage());
             $this->msg = "problem writing the file!";
             $this->statusCode = StatusServiceEnum::STATUS_CODE_ERRO;
             $this->errorCode = $th->getCode();

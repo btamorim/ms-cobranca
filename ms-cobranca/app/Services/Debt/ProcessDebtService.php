@@ -1,16 +1,17 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Debt;
 
 use Exception;
 use Throwable;
 use App\Traits\Log;
 use App\DTO\ChargeDTO;
 use Illuminate\Http\Request;
-use App\Services\DebtService;
 use App\Imports\ChargesImport;
-use App\Services\TicketService;
 use App\Services\InvoiceService;
+use App\Contracts\IDebtInterface;
+use App\Contracts\ITicketInterface;
+use App\Contracts\IInvoiceInterface;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\HeadingRowImport;
@@ -30,9 +31,9 @@ class ProcessDebtService implements IProcessDebtInterface
     public $errorCode;
 
     public function __construct(
-        private readonly TicketService $ticketService,
-        private readonly DebtService $debtService,
-        private readonly InvoiceService $invoiceService,
+        private readonly ITicketInterface $ticketService,
+        private readonly IDebtInterface $debtService,
+        private readonly IInvoiceInterface $invoiceService,
     )
     {
        /** Maintain the formatting of the CSV title. */
@@ -93,7 +94,7 @@ class ProcessDebtService implements IProcessDebtInterface
 
             return true;
 
-        } catch (Throwable $th) {
+        } catch (Throwable $th) { dd($th->getMessage());
             $this->statusCode = StatusServiceEnum::STATUS_CODE_ERRO;
             $this->msg = $th->getMessage();
             $this->errorCode = $th->getCode();

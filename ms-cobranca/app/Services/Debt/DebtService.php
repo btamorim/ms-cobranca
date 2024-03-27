@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Debt;
 
 use App\Models\Debt;
 use App\Models\Ticket;
@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
 use App\Contracts\ITicketInterface;
+use App\Contracts\IDebtInterface;
 use App\Http\Requests\TicketRequest;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Validator;
@@ -20,7 +21,7 @@ use Illuminate\Validation\ValidationException;
 
 // use App\Repositories\AdditionRepository;
 
-class DebtService
+class DebtService implements IDebtInterface
 {
     public int $statusCode;
     public $msg;

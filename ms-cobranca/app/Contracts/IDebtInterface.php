@@ -5,7 +5,7 @@ namespace App\Contracts;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 
-interface IUploadInterface
+interface IDebtInterface
 {
-    public function storeFile(UploadedFile $request): bool;
+    public function updateDebt(int $debId, int $ticketId): bool;
 }

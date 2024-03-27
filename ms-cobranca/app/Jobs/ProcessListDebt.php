@@ -4,7 +4,7 @@ namespace App\Jobs;
 
 use File;
 use Illuminate\Bus\Queueable;
-use App\Services\ProcessDebtService;
+use App\Services\Debt\ProcessDebtService;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Queue\InteractsWithQueue;
